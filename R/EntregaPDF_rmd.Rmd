@@ -1,0 +1,197 @@
+---
+title: "CLASSWORK 1"
+author: Juan Sebastian Gonzalez Castillo
+output: html_document
+date: "2023-08-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**ACTIVITY DEVELOPMENT**
+
+1.  Download the required libraries like "tidyverse" and "nycflights13" which provides a flight data to analyze, also is necessary download de library "knitr" to display data tables in an attractive and orderly way.
+2.  CLASSWORK
+
+**5.2.4 Exercises:**
+
+Item 1: Use the function "filter" for find all flights that had an arrival delay of two or more hours
+
+```{r}
+library(nycflights13)
+library(tidyverse)
+exer<-nycflights13::flights
+DELAYS <- filter(exer,arr_delay >="2")
+```
+
+The table 1 shows some flights that had an arrival delay
+
+```{r}
+library(knitr)
+kable(DELAYS[1:10, c(1, 14, 13, 9)],
+      caption = "Delays info",
+      align = "c")
+```
+
+Item 2: Using the function "filter" find all flights that flew to IAH or HOU, for this exercise I selected HOU
+
+```{r}
+exer<-nycflights13::flights
+HOUSTON<-filter(exer,dest=="HOU")
+```
+
+The table 2 shows some flights that flew to HOU
+
+```{r}
+library(knitr)
+kable(HOUSTON[1:10, c(1, 14, 13)],
+      caption = "Destionation info",
+      align = "c")
+```
+
+**5.3.1 Exercises:**
+
+Item 1: How could you use `arrange()` to sort all missing values to the start? (Hint: use `is.na()`). That function is used to check the flights with no info.
+
+```{r}
+MISSING <- flights %>% arrange(desc(is.na(dep_time)))
+```
+
+In the table 3 we can see the flights with no information
+
+```{r}
+library(knitr)
+kable(MISSING[1:10, c(1, 4, 6, 7, 9, 15)],
+      caption = "Flights with no Info",
+      align = "c")
+```
+
+Item 2: Sort `flights` to find the most delayed flights. Find the flights that left earliest. in this case we use de function "desc" to sort the information from most to least
+
+```{r}
+MORE_DELAYED <- flights %>% arrange(desc(arr_delay))
+```
+
+In the table 4 we can see the most delayed flights sort from most to least delayed
+
+```{r}
+library(knitr)
+kable(MORE_DELAYED[1:10, c(1, 2, 3, 9)],
+      caption = "Most delayed flights",
+      align = "c")
+```
+
+Item 3: Sort `flights` to find the fastest (highest speed) flights. In this case I associate speed with the flights with less time in the air so I sort the flights from slower to faster.
+
+```{r}
+FASTER <- flights %>% arrange(air_time)
+```
+
+In the table 5 we can see the fastest flights
+
+```{r}
+library(knitr)
+kable(FASTER[1:10, c(1, 2, 3, 15)],
+      caption = "Fastest flights" ,
+      align = "c" )
+```
+
+Item 4: Which flights travelled the farthest? Which travelled the shortest? For this case I organize the table in two ways, first from farthest to shortest and then from shortest to farthest
+
+```{r}
+AWAY<-flights %>% arrange(desc(distance))
+NEARBY<-flights %>% arrange(distance)
+```
+
+The table 6 shows the farthest flights
+
+```{r}
+library(knitr)
+kable(AWAY[1:10, c(1, 2, 3, 16)],
+      caption = "Farthest flights" ,
+      align = "c" )
+```
+
+The table 7 shows the shortest flights
+
+```{r}
+library(knitr)
+kable(NEARBY[1:10, c(1, 2, 3, 16)],
+      caption = "Shortest flights" ,
+      align = "c" )
+```
+
+**5.4.1 Exercises**
+
+Item 2: What happens if you include the name of a variable multiple times in a `select()` call?
+
+Ans// Multiple copies of that variable will be included in the resulting data frame. In other words, the variable will be duplicated in the output.
+
+Item 3: What does the `any_of()` function do? Why might it be helpful in conjunction with this vector?
+
+Ans// n cases where you have a variable that contains the column names you want to select, using \`any_ofany_of() can make your code more adaptable and maintainable, since you can easily modify the \`any_ofany_of()-type variable to make your code more adaptable and maintainable.
+
+Item 4: Does the result of running the following code surprise you? How do the select helpers deal with case by default? How can you change that default?
+
+Ans// This code selects the columns whose names contain the string "TIME" and which contain the text "TIME" in their cells
+
+```{r}
+select(flights, contains("TIME"))
+
+```
+
+**5.5.2 Exercises**
+
+Item 1: Currently `dep_time` and `sched_dep_time` are convenient to look at, but hard to compute with because they're not really continuous numbers. Convert them to a more convenient representation of number of minutes since midnight.
+
+The mutate() function is utilized to add a pair of new columns: dep_time_mins and sched_dep_time_mins. These columns represent the departure time and scheduled departure time, respectively, in terms of minutes elapsed since midnight. The calculation (dep_time %/% 100) \* 60 + dep_time %% 100 converts the provided hours and minutes into a cumulative minute count.
+
+```{r}
+MODIFIED <- flights %>%
+  mutate(dep_time_mins = (dep_time %/% 100) * 60 + dep_time %% 100,
+         sched_dep_time_mins = (sched_dep_time %/% 100) * 60 + sched_dep_time %% 100)
+```
+
+Table 8 show the two new columns created above
+
+```{r}
+library(knitr)
+kable(MODIFIED[1:10, c(1, 2, 3, 20, 21)],
+      caption = "Time Modified" ,
+      align = "c" )
+```
+
+Item 2: Compare `air_time` with `arr_time - dep_time`. What do you expect to see? What do you see? What do you need to do to fix it?
+
+```{r}
+COMPARISON <- MODIFIED %>%
+  mutate(arr_dep_time_diff = arr_time - dep_time_mins) %>%
+  filter(!is.na(air_time) & !is.na(arr_dep_time_diff)) %>%
+  select(air_time, arr_dep_time_diff)
+```
+
+Table 9 shows the comparison between the two variables created above
+
+```{r}
+library(knitr)
+kable(COMPARISON[1:10, c(1, 2)],
+      caption = "Comparison",
+      align = "c" )
+```
+
+**5.6.7 Exercises**
+
+Item 1: Brainstorm at least 5 different ways to assess the typical delay characteristics of a group of flights.
+
+Ans// Certainly, here are seven different ways to assess the typical delay characteristics of the mentioned flight scenarios:
+
+Average Delay: Calculate the average delay across all flights. For each scenario, this would provide an overview of the typical delay experienced by the flights.
+
+Median Delay: Calculate the median delay for each scenario. This would give a middle point in the distribution of delays and is less influenced by outliers
+
+Longest Delay: Identify the longest delay experienced in each scenario. This can highlight the extreme cases that might have significant impacts.
+
+Impact of Extreme Delays: Calculate the weighted average of delays, considering the impact of extreme delays. For instance, the weighted average might consider not just the duration of the delay but also the frequency of occurrence.
+
+Frequency of On-Time Flights: Calculate the percentage of flights that are on time (not delayed). This can help understand how often delays occur in each scenario.
